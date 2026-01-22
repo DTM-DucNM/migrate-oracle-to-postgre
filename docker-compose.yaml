@@ -24,5 +24,25 @@ services:
       POSTGRES_DB: db_postgres
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      - ./migration-output:/migration-output
     restart: unless-stopped
+
+  ora2pg:
+    image: georgmoser/ora2pg:latest
+    container_name: ora2pg-migration
+    environment:
+      - ORACLE_HOME=/usr/lib/oracle/19.26/client64
+      - LD_LIBRARY_PATH=/usr/lib/oracle/19.26/client64/lib
+      - TNS_ADMIN=/config
+      # Không set NLS_LANG để tránh lỗi ORA-12705
+    volumes:
+      - ./ora2pg/config:/config:ro
+      - ./ora2pg/output:/data
+      - ./ora2pg/logs:/logs
+    networks:
+      - default
+    depends_on:
+      - oracle
+      - postgres
+    restart: unless-stopped
+    # Giữ container chạy để có thể exec vào chạy migration khi cần
+    command: tail -f /dev/null

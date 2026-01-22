@@ -42,14 +42,29 @@ catch {
 # 4. Import dữ liệu bằng impdp
 Write-Host "Importing data (impdp)..." -ForegroundColor Cyan
 
-docker exec -i oracle-db impdp system/123456@XEPDB1 `
-    DIRECTORY=DUMP_DIR `
-    DUMPFILE=truyennhiem_clean09122025_01.dmp,truyennhiem_clean09122025_02.dmp,truyennhiem_clean09122025_03.dmp,truyennhiem_clean09122025_04.dmp `
-    LOGFILE=truyennhiem_clean09122025_import.log `
-    SCHEMAS=TRUYENNHIEM_NEW `
-    REMAP_SCHEMA=TRUYENNHIEM_NEW:TRUYENNHIEM_NEW `
-    REMAP_TABLESPACE=TRUYENNHIEM_NEW:USERS `
-    TABLE_EXISTS_ACTION=REPLACE
+# Kiểm tra file dump có tồn tại không
+Write-Host "Checking dump files..." -ForegroundColor Yellow
+$dumpFiles = @("truyennhiem_clean09122025_01.dmp", "truyennhiem_clean09122025_02.dmp", "truyennhiem_clean09122025_03.dmp", "truyennhiem_clean09122025_04.dmp")
+foreach ($file in $dumpFiles) {
+    $exists = docker exec oracle-db test -f "/opt/oracle/dump/$file"
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "  Found: $file" -ForegroundColor Green
+    } else {
+        Write-Host "  Missing: $file" -ForegroundColor Red
+    }
+}
+
+# Chạy impdp với đầy đủ tham số
+Write-Host "Running impdp..." -ForegroundColor Yellow
+$impdpResult = docker exec oracle-db bash -c "impdp system/123456@XEPDB1 DIRECTORY=DUMP_DIR DUMPFILE=truyennhiem_clean09122025_01.dmp,truyennhiem_clean09122025_02.dmp,truyennhiem_clean09122025_03.dmp,truyennhiem_clean09122025_04.dmp LOGFILE=truyennhiem_clean09122025_import.log SCHEMAS=TRUYENNHIEM_NEW REMAP_SCHEMA=TRUYENNHIEM_NEW:TRUYENNHIEM_NEW REMAP_TABLESPACE=TRUYENNHIEM_NEW:USERS TABLE_EXISTS_ACTION=REPLACE" 2>&1
+
+$impdpResult | ForEach-Object { Write-Host $_ }
+
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "Import completed successfully!" -ForegroundColor Green
+} else {
+    Write-Host "Import failed with exit code: $LASTEXITCODE" -ForegroundColor Red
+}
 
 Write-Host ""
 Write-Host "Import completed! Check log file to see the result." -ForegroundColor Green
