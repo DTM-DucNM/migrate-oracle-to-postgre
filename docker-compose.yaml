@@ -1,0 +1,28 @@
+services:
+  oracle:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: oracle-db
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: 123456
+      ORACLE_DATABASE: XEPDB1
+      ORACLE_CHARACTERSET: AL32UTF8
+    volumes:
+      - ./oracle-data:/opt/oracle/oradata
+      - ./data:/opt/oracle/dump
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: db_postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./migration-output:/migration-output
+    restart: unless-stopped
