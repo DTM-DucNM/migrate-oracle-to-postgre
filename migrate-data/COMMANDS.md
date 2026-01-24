@@ -66,7 +66,7 @@ NETWORK_NAME=$(docker network ls | grep migrate-oracle-to-postgre | awk '{print 
 # Export data từ Oracle
 docker run --rm --network $NETWORK_NAME \
   -v ./ora2pg/config:/config:ro \
-  -v ./ora2pg/output:/data \
+  -v ./migrate-data/output:/data \
   georgmoser/ora2pg:latest \
   ora2pg -c /config/ora2pg.conf --debug
 ```
@@ -88,7 +88,7 @@ docker run --rm --network $networkName `
 
 ```bash
 # Import tất cả file SQL
-for file in ora2pg/output/*.sql; do
+for file in migrate-data/output/*.sql; do
   echo "Importing $file..."
   docker exec -i postgres-db psql -U postgres -d db_postgres < "$file"
 done
@@ -212,10 +212,10 @@ docker logs postgres-db
 
 ```bash
 # List các file đã export
-ls -lh ora2pg/output/
+ls -lh migrate-data/output/
 
 # Xem nội dung một file SQL (first 50 lines)
-head -50 ora2pg/output/table_name.sql
+head -50 migrate-data/output/table_name.sql
 ```
 
 ---

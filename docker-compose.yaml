@@ -36,8 +36,8 @@ services:
       # Không set NLS_LANG để tránh lỗi ORA-12705
     volumes:
       - ./ora2pg/config:/config:ro
-      - ./ora2pg/output:/data
-      - ./ora2pg/logs:/logs
+      - ./migrate-data/output:/data
+      - ./migrate-data/logs:/logs
     networks:
       - default
     depends_on:

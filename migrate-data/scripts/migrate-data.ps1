@@ -7,8 +7,8 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 # projectDir phải là parent của migrate-data, không phải migrate-data chính nó
 $projectDir = Split-Path -Parent (Split-Path -Parent $scriptDir)
 $configDir = Join-Path $projectDir "ora2pg\config"
-$outputDir = Join-Path $projectDir "ora2pg\output"
-$logsDir = Join-Path $projectDir "ora2pg\logs"
+$outputDir = Join-Path $projectDir "migrate-data\output"
+$logsDir = Join-Path $projectDir "migrate-data\logs"
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $logFile = Join-Path $logsDir "migration-$timestamp.log"
 
@@ -110,16 +110,19 @@ Write-Host ""
 # Chạy Ora2Pg và capture output
 Write-Host "Running Ora2Pg migration..." -ForegroundColor Cyan
 # Set ORACLE_HOME và LD_LIBRARY_PATH, KHÔNG set NLS_LANG để tránh lỗi ORA-12705
+# Mount logs volume để Ora2Pg có thể ghi log vào đó (nếu cần)
+$logsPath = (Resolve-Path $logsDir).Path
 $ora2pgOutput = docker run --rm --network $networkName `
     -e ORACLE_HOME=/usr/lib/oracle/19.26/client64 `
     -e LD_LIBRARY_PATH=/usr/lib/oracle/19.26/client64/lib `
     -e TNS_ADMIN=/config `
     -v "${configPath}:/config:ro" `
     -v "${outputPath}:/data" `
+    -v "${logsPath}:/logs" `
     georgmoser/ora2pg:latest `
     bash -c "unset NLS_LANG; ora2pg -c /config/ora2pg.conf --debug" 2>&1
 
-# Lưu output vào log file
+# Lưu output vào log file trên host (backup)
 $ora2pgOutput | Out-File -FilePath $exportLog -Encoding UTF8
 
 # Kiểm tra exit code

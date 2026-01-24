@@ -131,6 +131,6 @@ Xem file `README.md` để biết chi tiết đầy đủ về:
 ## 🆘 Hỗ trợ
 
 Nếu gặp vấn đề:
-1. Kiểm tra logs trong `ora2pg/logs/`
+1. Kiểm tra logs trong `migrate-data/logs/`
 2. Kiểm tra container logs: `docker logs oracle-db`, `docker logs postgres-db`
 3. Xem hướng dẫn chi tiết trong `README.md`

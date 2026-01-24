@@ -1,0 +1,17 @@
+# Output files từ Ora2Pg
+output/
+*.sql
+*.csv
+*.dat
+
+# Log files
+logs/
+*.log
+
+# Backup files
+backup/
+*.sql.bak
+
+# Temporary files
+*.tmp
+*.temp

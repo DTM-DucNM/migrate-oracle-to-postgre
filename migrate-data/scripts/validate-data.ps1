@@ -127,7 +127,7 @@ if ($mismatched -gt 0 -or $missing -gt 0) {
     Write-Host "Some tables have issues. Check the details above." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "To investigate further:"
-    Write-Host "  1. Check migration logs in ora2pg\logs\"
+    Write-Host "  1. Check migration logs in migrate-data\logs\"
     Write-Host "  2. Compare sample data manually"
     Write-Host "  3. Check for data type conversion issues"
 }

@@ -124,7 +124,7 @@ if [ $MISMATCHED -gt 0 ] || [ $MISSING -gt 0 ]; then
     echo -e "${YELLOW}⚠️  Some tables have issues. Check the details above.${NC}"
     echo ""
     echo "To investigate further:"
-    echo "  1. Check migration logs in ora2pg/logs/"
+    echo "  1. Check migration logs in migrate-data/logs/"
     echo "  2. Compare sample data manually"
     echo "  3. Check for data type conversion issues"
 fi

@@ -92,7 +92,8 @@ services:
     container_name: ora2pg-migration
     volumes:
       - ./ora2pg/config:/config:ro
-      - ./ora2pg/output:/data
+      - ./migrate-data/output:/data
+      - ./migrate-data/logs:/logs
     networks:
       - default
     depends_on:
@@ -112,10 +113,9 @@ services:
 
 ```bash
 mkdir -p migrate-data/scripts
+mkdir -p migrate-data/output
+mkdir -p migrate-data/logs
 mkdir -p ora2pg/config
-mkdir -p ora2pg/output
-mkdir -p ora2pg/logs
-mkdir -p ora2pg/backup
 ```
 
 ### 3.3. Pull Docker image
@@ -266,7 +266,7 @@ docker run --rm --network migrate-oracle-to-postgre_default \
 ```bash
 docker run --rm --network migrate-oracle-to-postgre_default \
   -v ./ora2pg/config:/config:ro \
-  -v ./ora2pg/output:/data \
+  -v ./migrate-data/output:/data \
   georgmoser/ora2pg:latest \
   ora2pg -c /config/ora2pg.conf
 ```
@@ -276,7 +276,7 @@ docker run --rm --network migrate-oracle-to-postgre_default \
 ```bash
 docker run --rm --network migrate-oracle-to-postgre_default \
   -v ./ora2pg/config:/config:ro \
-  -v ./ora2pg/output:/data \
+  -v ./migrate-data/output:/data \
   georgmoser/ora2pg:latest \
   ora2pg -c /config/ora2pg.conf \
     --type COPY \
@@ -291,10 +291,10 @@ Sau khi export, Ora2Pg sẽ tạo các file SQL. Import vào PostgreSQL:
 
 ```bash
 # Import từ file SQL
-docker exec -i postgres-db psql -U postgres -d db_postgres < ora2pg/output/data.sql
+docker exec -i postgres-db psql -U postgres -d db_postgres < migrate-data/output/data.sql
 
 # Hoặc import từng file (nếu FILE_PER_TABLE=1)
-for file in ora2pg/output/*.sql; do
+for file in migrate-data/output/*.sql; do
   echo "Importing $file..."
   docker exec -i postgres-db psql -U postgres -d db_postgres < "$file"
 done
@@ -615,8 +615,8 @@ SET session_replication_role = 'origin';
 # Chạy với log file
 docker run --rm --network migrate-oracle-to-postgre_default \
   -v ./ora2pg/config:/config:ro \
-  -v ./ora2pg/output:/data \
-  -v ./ora2pg/logs:/logs \
+  -v ./migrate-data/output:/data \
+  -v ./migrate-data/logs:/logs
   georgmoser/ora2pg:latest \
   ora2pg -c /config/ora2pg.conf 2>&1 | tee /logs/migration-$(date +%Y%m%d-%H%M%S).log
 ```
@@ -664,7 +664,7 @@ docker run --rm --network migrate-oracle-to-postgre_default \
 ## 🆘 Hỗ trợ
 
 Nếu gặp vấn đề, kiểm tra:
-1. Log files trong `ora2pg/logs/`
-2. Ora2Pg output trong `ora2pg/output/`
+1. Log files trong `migrate-data/logs/`
+2. Ora2Pg output trong `migrate-data/output/`
 3. Container logs: `docker logs ora2pg-migration`
 4. Database logs: `docker logs oracle-db` và `docker logs postgres-db`

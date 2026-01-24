@@ -37,10 +37,12 @@ echo ""
 # Test Oracle connection
 echo "2. Testing Oracle connection..."
 ORACLE_TEST=$(docker run --rm --network "$NETWORK_NAME" \
-    -e NLS_LANG=AMERICAN_AMERICA.AL32UTF8 \
+    -e ORACLE_HOME=/usr/lib/oracle/19.26/client64 \
+    -e LD_LIBRARY_PATH=/usr/lib/oracle/19.26/client64/lib \
+    -e TNS_ADMIN=/config \
     -v "$(pwd)/ora2pg/config:/config:ro" \
     georgmoser/ora2pg:latest \
-    ora2pg -t SHOW_VERSION -c /config/ora2pg.conf 2>&1)
+    bash -c "unset NLS_LANG; ora2pg -t SHOW_VERSION -c /config/ora2pg.conf" 2>&1)
 
 if echo "$ORACLE_TEST" | grep -q "Oracle"; then
     echo "   ✅ Oracle connection: SUCCESS"
@@ -55,10 +57,12 @@ echo ""
 # Test PostgreSQL connection
 echo "3. Testing PostgreSQL connection..."
 PG_TEST=$(docker run --rm --network "$NETWORK_NAME" \
-    -e NLS_LANG=AMERICAN_AMERICA.AL32UTF8 \
+    -e ORACLE_HOME=/usr/lib/oracle/19.26/client64 \
+    -e LD_LIBRARY_PATH=/usr/lib/oracle/19.26/client64/lib \
+    -e TNS_ADMIN=/config \
     -v "$(pwd)/ora2pg/config:/config:ro" \
     georgmoser/ora2pg:latest \
-    ora2pg -t SHOW_VERSION -c /config/ora2pg.conf 2>&1)
+    bash -c "unset NLS_LANG; ora2pg -t SHOW_VERSION -c /config/ora2pg.conf" 2>&1)
 
 if echo "$PG_TEST" | grep -q "PostgreSQL\|Postgres"; then
     echo "   ✅ PostgreSQL connection: SUCCESS"
@@ -73,10 +77,12 @@ echo ""
 # Test Oracle schema access
 echo "4. Testing Oracle schema access..."
 ORACLE_SCHEMA_TEST=$(docker run --rm --network "$NETWORK_NAME" \
-    -e NLS_LANG=AMERICAN_AMERICA.AL32UTF8 \
+    -e ORACLE_HOME=/usr/lib/oracle/19.26/client64 \
+    -e LD_LIBRARY_PATH=/usr/lib/oracle/19.26/client64/lib \
+    -e TNS_ADMIN=/config \
     -v "$(pwd)/ora2pg/config:/config:ro" \
     georgmoser/ora2pg:latest \
-    ora2pg -t SHOW_TABLE -c /config/ora2pg.conf 2>&1 | head -20)
+    bash -c "unset NLS_LANG; ora2pg -t SHOW_TABLE -c /config/ora2pg.conf" 2>&1 | head -20)
 
 if echo "$ORACLE_SCHEMA_TEST" | grep -q "TABLE\|table"; then
     echo "   ✅ Oracle schema access: SUCCESS"

@@ -14,8 +14,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # PROJECT_DIR phải là parent của migrate-data, không phải migrate-data chính nó
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CONFIG_DIR="$PROJECT_DIR/ora2pg/config"
-OUTPUT_DIR="$PROJECT_DIR/ora2pg/output"
-LOGS_DIR="$PROJECT_DIR/ora2pg/logs"
+OUTPUT_DIR="$PROJECT_DIR/migrate-data/output"
+LOGS_DIR="$PROJECT_DIR/migrate-data/logs"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 LOG_FILE="$LOGS_DIR/migration-$TIMESTAMP.log"
 
@@ -100,12 +100,14 @@ echo "Config directory: $CONFIG_DIR_ABS"
 echo "Output directory: $OUTPUT_DIR_ABS"
 
 if docker run --rm --network "$NETWORK_NAME" \
-    -e NLS_LANG=AMERICAN_AMERICA.AL32UTF8 \
+    -e ORACLE_HOME=/usr/lib/oracle/19.26/client64 \
+    -e LD_LIBRARY_PATH=/usr/lib/oracle/19.26/client64/lib \
+    -e TNS_ADMIN=/config \
     -v "$CONFIG_DIR_ABS:/config:ro" \
     -v "$OUTPUT_DIR_ABS:/data" \
+    -v "$LOGS_DIR:/logs" \
     georgmoser/ora2pg:latest \
-    ora2pg -c /config/ora2pg.conf \
-    --debug 2>&1 | tee "$EXPORT_LOG"; then
+    bash -c "unset NLS_LANG; ora2pg -c /config/ora2pg.conf --debug" 2>&1 | tee "$EXPORT_LOG"; then
     
     echo ""
     echo -e "${GREEN}✅ Data export completed${NC}"
